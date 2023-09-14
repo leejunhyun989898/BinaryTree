@@ -1,17 +1,93 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
-
+#define SIZE 100
 
 typedef struct TreeNode {
     int data;
     struct TreeNode* left, * right;
 } TreeNode;
 
-//              1
-//        2         7
-//     3     6   8     9
-//  4     5         10   11
+int top = -1;
+TreeNode* stack[SIZE];
+
+void push(TreeNode* p)
+{
+    if (top < SIZE - 1)
+        stack[++top] = p;
+}
+
+TreeNode* pop()
+{
+    TreeNode* p = NULL;
+    if (top >= 0)
+        p = stack[top--];
+    return p;
+}
+
+void inorder_iter(TreeNode* root)
+{
+    while (1) {
+        // 현재 노드부터 왼쪽 자식 노드로 이동하면서 스택에 노드를 저장
+        for (; root; root = root->left)
+            push(root);
+
+        // 스택에서 노드를 꺼내어 출력하고, 꺼낸 노드의 오른쪽 자식으로 이동
+        root = pop();
+        if (!root)
+            break; // 더 이상 처리할 노드가 없으면 반복 종료
+
+        printf("[%d] ", root->data); // 노드 데이터 출력
+        root = root->right; // 오른쪽 자식 노드로 이동
+    }
+}
+
+void preorder_iter(TreeNode* root)
+{
+    while (1) {
+        // 현재 노드를 출력하고 스택에 저장한 후, 왼쪽 자식 노드로 이동
+        for (; root; root = root->left) {
+            printf("[%d] ", root->data); // 노드 데이터 출력
+            push(root);
+        }
+
+        // 스택에서 노드를 꺼내어 오른쪽 자식 노드로 이동
+        root = pop();
+        if (!root)
+            break; // 더 이상 처리할 노드가 없으면 반복 종료
+
+        root = root->right; // 오른쪽 자식 노드로 이동
+    }
+}
+
+void postorder_iter(TreeNode* root)
+{
+    TreeNode* last = NULL; // 마지막으로 방문한 노드를 기록하는 변수
+    while (1) {
+        // 현재 노드부터 왼쪽 자식 노드로 이동하면서 스택에 노드를 저장
+        for (; root; root = root->left)
+            push(root);
+
+        while (!root && top >= 0) {
+            root = stack[top];
+            // 오른쪽 자식이 없거나 이미 방문한 경우, 노드를 출력하고 스택에서 제거
+            if (!root->right || root->right == last) {
+                printf("[%d] ", root->data); // 노드 데이터 출력
+                last = root; // 마지막으로 방문한 노드 업데이트
+                pop();
+                root = NULL;
+            }
+            else {
+                root = root->right; // 오른쪽 자식 노드로 이동
+            }
+        }
+
+        if (top < 0)
+            break; // 처리할 노드 없으면 반복 종료
+    }
+}
+
+
 TreeNode s1 = { 4, NULL,NULL };
 TreeNode s2 = { 5, NULL,NULL };
 TreeNode s3 = { 3, &s1,&s2 };
@@ -23,121 +99,19 @@ TreeNode s8 = { 8, NULL,NULL };
 TreeNode s9 = { 9, &s6,&s7 };
 TreeNode s10 = { 7, &s8,&s9 };
 TreeNode s11 = { 1, &s5,&s10 };
-TreeNode* node = &s11;
-// 전위 순회 함수
-void preorder(TreeNode* node) {
-    if (node != NULL) {
-        printf("%d ", node->data); // 노드 데이터 출력
-        preorder(node->left);      // 왼쪽 서브트리 순회
-        preorder(node->right);     // 오른쪽 서브트리 순회
-    }
-}
+TreeNode* root = &s11;
 
-// 중위 순회 함수
-void inorder(TreeNode* node) {
-    if (node != NULL) {
-        inorder(node->left);      // 왼쪽 서브트리 순회
-        printf("%d ", node->data); // 노드 데이터 출력
-        inorder(node->right);     // 오른쪽 서브트리 순회
-    }
-}
+int main(void)
+{
 
-// 후위 순회 함수
-void postorder(TreeNode* node) {
-    if (node != NULL) {
-        postorder(node->left);    // 왼쪽 서브트리 순회
-        postorder(node->right);   // 오른쪽 서브트리 순회
-        printf("%d ", node->data); // 노드 데이터 출력
-    }
-}
-
-int main(void) {
-    TreeNode* n1, * n2, * n3, * n4, * n5, * n6, * n7, * n8, * n9, * n10, * n11;
-    n1 = (TreeNode*)malloc(sizeof(TreeNode));
-    n2 = (TreeNode*)malloc(sizeof(TreeNode));
-    n3 = (TreeNode*)malloc(sizeof(TreeNode));
-    n4 = (TreeNode*)malloc(sizeof(TreeNode));
-    n5 = (TreeNode*)malloc(sizeof(TreeNode));
-    n6 = (TreeNode*)malloc(sizeof(TreeNode));
-    n7 = (TreeNode*)malloc(sizeof(TreeNode));
-    n8 = (TreeNode*)malloc(sizeof(TreeNode));
-    n9 = (TreeNode*)malloc(sizeof(TreeNode));
-    n10 = (TreeNode*)malloc(sizeof(TreeNode));
-    n11 = (TreeNode*)malloc(sizeof(TreeNode));
-
-    //노드생성
-    n1->data = 1;
-    n1->left = n2;
-    n1->right = n7;
-    n2->data = 2;
-    n2->left = n3;
-    n2->right = n6;
-    n3->data = 3;
-    n3->left = n4;
-    n3->right = n5;
-    n4->data = 4;
-    n4->left = NULL;
-    n4->right = NULL;
-    n5->data = 5;
-    n5->left = NULL;
-    n5->right = NULL;
-    n6->data = 6;
-    n6->left = NULL;
-    n6->right = NULL;
-    n7->data = 7;
-    n7->left = n8;
-    n7->right = n9;
-    n8->data = 8;
-    n8->left = NULL;
-    n8->right = NULL;
-    n9->data = 9;
-    n9->left = n10;
-    n9->right = n11;
-    n10->data = 10;
-    n10->left = NULL;
-    n10->right = NULL;
-    n11->data = 11;
-    n11->left = NULL;
-    n11->right = NULL;
-
-    printf("< Array Tree >\n\n");
-    printf("1. Preorder: ");
-    preorder(n1); // 전위 순회 호출
+    printf("1. 전위 순회\n");
+    preorder_iter(root);
     printf("\n\n");
-
-    printf("2. Inorder: ");
-    inorder(n1); // 중위 순회 호출
+    printf("2. 중위 순회\n");
+    inorder_iter(root);
     printf("\n\n");
-
-    printf("3. Postorder: ");
-    postorder(n1); // 후위 순회 호출
+    printf("3. 후위 순회\n");
+    postorder_iter(root);
     printf("\n\n");
-
-    // 메모리 해제
-    free(n1);
-    free(n2);
-    free(n3);
-    free(n4);
-    free(n5);
-    free(n6);
-    free(n7);
-    free(n8);
-    free(n9);
-    free(n10);
-    free(n11);
-
-    printf("< Link Tree >\n\n");
-    printf("1. Preorder: ");
-    preorder(node); // 전위 순회 호출
-    printf("\n\n");
-
-    printf("2. Inorder: ");
-    inorder(node); // 중위 순회 호출
-    printf("\n\n");
-
-    printf("3. Postorder: ");
-    postorder(node); // 후위 순회 호출
-    printf("\n");
-
     return 0;
 }
